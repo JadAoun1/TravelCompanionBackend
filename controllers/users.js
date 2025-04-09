@@ -18,7 +18,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // route to get details of a user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
         if (!user) {
