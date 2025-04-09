@@ -20,7 +20,13 @@ router.get('/', verifyToken, async (req, res) => {
 // route to get details of a user
 router.get('/:userId', verifyToken, async (req, res) => {
     try {
+        // Block the request if a user is looking for the details of another user
+        if (req.user._id !== req.params.userId) {
+            return res.status(403).json({ error: 'You are not authorized to view these details.' });
+        }
+
         const user = await User.findById(req.params.userId);
+        
         if (!user) {
             return res.status(400).json({ error: 'User not found.' });
         };
