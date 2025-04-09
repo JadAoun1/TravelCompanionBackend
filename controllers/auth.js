@@ -38,7 +38,30 @@ router.post('/sign-up', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     };
+});
 
+router.post('/sign-in', async (req, res) => {
+    try {
+        // Look up the user in the database
+        const user = await User.findOne({ username: req.body.username });
+        // If the user doesn't exist, send an error message
+        if (!user) {
+            res.status(401).json({ error: "Invalid credentials." });
+        };
+
+        // Use bcrypt to check if password is correct
+        const isPasswordCorrect = bcrypt.compareSync(
+            req.body.password, user.password
+        );
+
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ message: 'Invalid credentials.' });
+        }
+
+        res.status(200).json({ message: 'Signing in.'})
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 module.exports = router;
