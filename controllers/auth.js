@@ -40,6 +40,7 @@ router.post('/sign-up', async (req, res) => {
     };
 });
 
+// Sign in a user if their username exists in the database, and if the password matches. Then create and send back a token to the user.
 router.post('/sign-in', async (req, res) => {
     try {
         // Look up the user in the database
@@ -56,9 +57,16 @@ router.post('/sign-in', async (req, res) => {
 
         if (!isPasswordCorrect) {
             return res.status(401).json({ message: 'Invalid credentials.' });
-        }
+        };
 
-        res.status(200).json({ message: 'Signing in.'})
+        // Construct the payload
+        const payload = {username: user.username, _id: user._id };
+
+        // Create the token and attach it to the payload
+        const token = jwt.sign({ payload }, process.env.JWT_SECRET);
+
+        // Send the token in the response
+        res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
