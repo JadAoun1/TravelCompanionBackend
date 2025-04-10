@@ -26,7 +26,7 @@ router.get('/:userId', verifyToken, async (req, res) => {
         }
 
         const user = await User.findById(req.params.userId);
-        
+
         if (!user) {
             return res.status(400).json({ error: 'User not found.' });
         };
@@ -35,6 +35,33 @@ router.get('/:userId', verifyToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     };
+});
+
+// route to update a user
+router.put('/:userId', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return res.status(403).json({ message: 'User not found.' });
+        };
+
+        // Check if user is authorized to update
+        if (req.user._id !== req.params.userId) {
+            return res.status(403).json({ error: 'You are not authorized to view these details.' });
+        };
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.userId,
+            req.body,
+            { new: true }
+        );
+
+        res.status(200).json(updatedUser);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 module.exports = router;
