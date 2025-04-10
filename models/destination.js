@@ -1,5 +1,5 @@
 // models/destination.js
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 
 const attractionSchema = new mongoose.Schema({
     name: {
@@ -10,6 +10,22 @@ const attractionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+    },
+    visitDate: {
+        type: Date,
+    },
+    cost: {
+        type: Number,
+    },
+    notes: {
+        type: String,
+    },
+    isVisited: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const destinationSchema = new mongoose.Schema({
@@ -17,8 +33,17 @@ const destinationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // Embed attractionsSchema
-    attractions: [],
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date,
+    },
+    accommodations: {
+        type: String,
+    },
+    // Properly embed attractionsSchema as a subdocument array
+    attractions: [attractionSchema],
 });
 
 const Destination = mongoose.model('Destination', destinationSchema);
