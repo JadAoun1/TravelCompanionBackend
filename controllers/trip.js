@@ -26,6 +26,29 @@ router.get("/", verifyToken, async (req, res) => {
 // Delete Route: Delete a trip
 
 // Update Route: Update a trip
+router.put('/:tripId', verifyToken, async (req, res) => {
+    try {
+        // Need to Find Trip before updating 
+       const trip = await Trip.findById(req.params.tripId);
+
+       // Check if the trip exists
+        if (!trip) {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
+
+        // Check if user is one of the travellers
+        if (!trip.travellers.includes(req.user._id)) {
+            return res.status(403).json({ message: 'Oops! Looks like you are not a part of this trip' });
+        }
+
+        // Update the trip with the new information
+        const updatedTrip = await Trip.findByIdAndUpdate(req.params.tripId, req.body, { new: true })
+
+        res.status(200).json(updatedTrip);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 //  Create Route
 router.post("/", verifyToken, async (req, res) => {
