@@ -64,4 +64,25 @@ router.put('/:userId', verifyToken, async (req, res) => {
     }
 });
 
+// route to delete a user
+router.delete('/:userId', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+
+        if (!user) {
+            return res.status(403).json({ message: 'User not found.' });
+        };
+
+        if (req.user._id !== req.params.userId) {
+            return res.status(403).json({ error: 'You are not authorized to delete this user.' });
+        };
+
+        const deletedUser = await User.findByIdAndDelete(req.params.userId);
+
+        res.status(200).json({ deletedUser });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    };
+});
+
 module.exports = router;
