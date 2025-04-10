@@ -1,4 +1,5 @@
 // models/destination.js
+const mongoose = require('mongoose'); 
 
 const attractionSchema = new mongoose.Schema({
     name: {

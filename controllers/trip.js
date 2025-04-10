@@ -1,36 +1,35 @@
 const express = require("express");
-const Trip = require("../models/trip");
 const router = express.Router();
+const verifyToken = require("../middleware/verify-token.js");
+const Trip = require("../models/trip");
+const Destination = require("../models/destination");
 
 // INDUCES
-// Need to add authentication middleware to protect these routes
-// Need to add middleware to check if user is logged in
 
 // Index Route: Get all trips
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const trips = await Trip.find().populate("destination travellers");
+    const trips = await Trip.find().populate("destination travellers").sort({ createdAt: "desc" }); // Sort trips in descending order
     res.status(200).json(trips);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// New Route:
-// Used to render form for creating new trip. (Not sure if this is needed)
-// Maybe Implement in frontend as a router link instead
-router.get("/new", (req, res) => {
-  nm;
-  res.status(200).json({ message: "New Route Working!" });
-})
+// // New Route:
+// // Used to render form for creating new trip. (Not sure if this is needed)
+// // Maybe Implement in frontend as a router link instead
+// router.get("/new", (req, res) => {
+//   res.status(200).json({ message: "New Route Working!" });
+// })
 
 // Delete Route: Delete a trip
 
 // Update Route: Update a trip
 
-// Basic Create Route
-// Need to add authentication middleware 
-router.post("/", async (req, res) => {
+//  Create Route
+router.post("/", verifyToken, async (req, res) => {
+  req.body.travellers = [req.user._id]; // Putting this in an array will allow multiple users to be associated with a trip
   try {
     const trip = await Trip.create(req.body);
     res.status(201).json(trip);
@@ -39,6 +38,22 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Edit Route:
+// Edit Route: Render in frontend form to edit a trip
 
 // Show Route: Get a specific trip
+router.get('/:tripId', verifyToken, async (req, res) => {
+    try {
+        const trip = await Trip.findById(req.params.tripId) 
+            .populate('destination')
+            .populate('travellers');
+        
+        if (!trip) {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
+        res.status(200).json(trip);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+module.exports = router;
