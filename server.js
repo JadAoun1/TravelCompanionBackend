@@ -16,6 +16,7 @@ const authRouter = require('./controllers/auth.js');
 const tripRouter = require('./controllers/trip.js');
 const userRouter = require('./controllers/users.js');
 const destinationRouter = require('./controllers/destination.js');
+const attractionsRouter = require('./controllers/attractions.js');
 
 // ----------------------------------------------------------- Connect to MongoDB ------------------------------------------------------------
 
@@ -34,9 +35,10 @@ app.use(logger('dev'));
 // ----------------------------------------------------------------- Routes ------------------------------------------------------------------
 
 app.use('/auth', authRouter);
-app.use('/trips', tripRouter);
+app.use('/users/:userId/trips', tripRouter);
 app.use('/users', userRouter);
-app.use('/trips', destinationRouter);
+app.use('/', destinationRouter);
+app.use('/', attractionsRouter);
 
 // ----------------------------------------------------------------- Server ------------------------------------------------------------------
 

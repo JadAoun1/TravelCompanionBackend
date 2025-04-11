@@ -4,11 +4,26 @@ const verifyToken = require("../middleware/verify-token.js");
 const Trip = require("../models/trip");
 const Destination = require("../models/destination");
 
-// INDUCES
+// Index Route: Get all trips for a specific user
+router.get("/", verifyToken, async (req, res) => {
+  try {
+    const trips = await Trip.find({ travellers: req.user._id })
+      .populate("destination travellers")
+      .sort({ createdAt: "desc" });
+    res.status(200).json(trips);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// New Route: Form for creating a new trip
+router.get("/new", verifyToken, (req, res) => {
+  res.status(200).json({ message: "New Trip Form" });
+});
 
 // Create a Trip:
 router.post("/", verifyToken, async (req, res) => {
-  req.body.travellers = [req.user._id]; // Putting this in an array will allow multiple users to be associated with a trip
+  req.body.travellers = [req.user._id];
   try {
     const trip = await Trip.create(req.body);
     res.status(201).json(trip);
@@ -16,20 +31,6 @@ router.post("/", verifyToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-// Index Route: Get all trips
-router.get("/", verifyToken, async (req, res) => {
-  try {
-    const trips = await Trip.find({travellers: req.user._id}) // Users can only see their own trips now. This was set to users can see all trips before. 
-      .populate("destination travellers")
-      .sort({ createdAt: "desc" }); // Sort trips in descending order
-    res.status(200).json(trips);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 
 // Show Route: Show a specific trip
 router.get("/:tripId", verifyToken, async (req, res) => {
@@ -47,26 +48,37 @@ router.get("/:tripId", verifyToken, async (req, res) => {
   }
 });
 
+// Edit Route: Form to edit a trip
+router.get("/:tripId/edit", verifyToken, async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.tripId);
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+    if (!trip.travellers.some(id => id.toString() === req.user._id)) {
+      return res.status(403).json({ message: "Unauthorized to edit this trip" });
+    }
+    res.status(200).json({ message: "Edit Trip Form", trip });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Update Route: Update a trip
 router.put("/:tripId", verifyToken, async (req, res) => {
   try {
-    // Need to Find Trip before updating
     const trip = await Trip.findById(req.params.tripId);
 
-    // Check if the trip exists
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
 
-    // Check if user is one of the travellers
-    if (!trip.travellers.includes(req.user._id)) {
+    if (!trip.travellers.some(id => id.toString() === req.user._id)) {
       return res
         .status(403)
         .json({ message: "Oops! Looks like you are not a part of this trip" });
     }
 
-    // Update the trip with the new information
     const updatedTrip = await Trip.findByIdAndUpdate(
       req.params.tripId,
       req.body,
@@ -79,34 +91,26 @@ router.put("/:tripId", verifyToken, async (req, res) => {
   }
 });
 
-
 // Delete Route: Delete a trip
 router.delete("/:tripId", verifyToken, async (req, res) => {
   try {
-      const trip = await Trip.findById(req.params.tripId);
-      
-      // Check if the trip exists
-      if (!trip) {
-          return res.status(404).json({ message: "Trip not found" });
-        }
-        
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res
-            .status(403)
-            .json({ message: "Oops! Looks like you are not a part of this trip" });
-        }
-        // Delete the trip
-        const deletedTrip = await Trip.findByIdAndDelete(req.params.tripId);
-        res.status(200).json(deletedTrip);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    const trip = await Trip.findById(req.params.tripId);
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
     }
+
+    if (!trip.travellers.some(id => id.toString() === req.user._id)) {
+      return res
+        .status(403)
+        .json({ message: "Oops! Looks like you are not a part of this trip" });
+    }
+    const deletedTrip = await Trip.findByIdAndDelete(req.params.tripId);
+    res.status(200).json(deletedTrip);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
-
-
-
-
 
 module.exports = router;
 
@@ -123,5 +127,5 @@ module.exports = router;
 // })
 
 
-// Edit Route: 
+// Edit Route:
 // Not sure if needed in backend, should Render in frontend as a form to edit a trip
