@@ -4,7 +4,7 @@ const verifyToken = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
 
 // Index Route: Get all attractions for a destination
-router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -17,7 +17,7 @@ router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 });
 
 // Show Route: Get a specific attraction
-router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -34,7 +34,7 @@ router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 });
 
 // Create Route: Create a new attraction
-router.post('/users/:userId/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -49,7 +49,7 @@ router.post('/users/:userId/trips/:tripId/destinations/:destinationId/attraction
 });
 
 // Update Route: Update an attraction
-router.put('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -68,18 +68,27 @@ router.put('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 });
 
 // Delete Route: Delete an attraction
-router.delete('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+    
     try {
+        
         const destination = await Destination.findById(req.params.destinationId);
+
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
         }
+        
         const attraction = destination.attractions.id(req.params.attractionId);
+        console.log(attraction)
+        
         if (!attraction) {
             return res.status(404).json({ message: "Attraction not found" });
         }
-        attraction.remove();
+        
+        attraction.id(req.params.attractionId).remove();
+        
         await destination.save();
+        
         res.status(200).json({ message: "Attraction deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
