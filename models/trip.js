@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 
 const tripSchema = new mongoose.Schema(
   {
-    name: {
+    // changing from "name" to "title"
+    title: {
       type: String,
       required: true,
     },
