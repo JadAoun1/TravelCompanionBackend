@@ -27,8 +27,10 @@ router.post("/", verifyToken, async (req, res) => {
 // Index Route: Get all trips
 router.get("/", verifyToken, async (req, res) => {
     try {
-        const trips = await Trip.find({ travellers: req.user._id }) // Users can only see their own trips now. This was set to users can see all trips before. 
+        // Updated to make sure that the nested structure is found correctly
+        const trips = await Trip.find({ 'travellers.user': req.user._id }) // Users can only see their own trips now. This was set to users can see all trips before. 
             .populate("destination travellers")
+            .populate('travellers.user')
             .sort({ createdAt: "desc" }); // Sort trips in descending order
         res.status(200).json(trips);
     } catch (error) {
