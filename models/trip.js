@@ -29,7 +29,7 @@ const tripSchema = new mongoose.Schema(
                 // Viewer, in theory, if the trip is made public (verus private) and does not have permissions to make any edits.
                 enum: ['Owner', 'Editor', 'Viewer'],
                 // Default ensures that the user doesn't have permissions to make any edits.
-                default: ['Viewer'],
+                default: 'Viewer',
             }
         }
     ]
