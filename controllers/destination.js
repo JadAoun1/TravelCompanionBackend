@@ -3,28 +3,42 @@ const router = express.Router();
 const verifyToken = require("../middleware/verify-token.js");
 const Destination = require("../models/destination");
 const Trip = require("../models/trip");
+const mongoose = require("mongoose");
 
+// New Route: Form for creating a new destination
+router.get("/users/:userId/trips/:tripId/destinations/new", verifyToken, async (req, res) => {
+    try {
+        const trip = await Trip.findById(req.params.tripId);
+        if (!trip) {
+            return res.status(404).json({ message: "Trip not found" });
+        }
+
+        if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
+            return res.status(403).json({ message: "Unauthorized to access this trip" });
+        }
+
+        res.status(200).json({ message: "New Destination Form" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Create a Destination:
-router.post("/:tripId/destinations", verifyToken, async (req, res) => {
+router.post("/users/:userId/trips/:tripId/destinations", verifyToken, async (req, res) => {
     try {
-        // First find the trip to verify ownership
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
             return res.status(403).json({ message: "You are not authorized to add destinations to this trip" });
         }
 
-        // Create the destination
         const destination = await Destination.create(req.body);
 
-        // Update the trip with the new destination
-        trip.destination = destination._id;
+        trip.destination.push(destination._id);
         await trip.save();
 
         res.status(201).json(destination);
@@ -34,17 +48,16 @@ router.post("/:tripId/destinations", verifyToken, async (req, res) => {
 });
 
 // Index Route: Get all destinations for a trip
-router.get("/:tripId/destinations", verifyToken, async (req, res) => {
+router.get("/users/:userId/trips/:tripId/destinations", verifyToken, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId)
-            .populate("destination");
+            .populate("destination travellers");
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(traveller => traveller._id.equals(req.user._id))) {
             return res.status(403).json({ message: "You are not authorized to view destinations for this trip" });
         }
 
@@ -55,7 +68,7 @@ router.get("/:tripId/destinations", verifyToken, async (req, res) => {
 });
 
 // Show Route: Show a specific destination
-router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.get("/users/:userId/trips/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
@@ -63,8 +76,7 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
             return res.status(403).json({ message: "You are not authorized to view this destination" });
         }
 
@@ -81,7 +93,7 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Update Route: Update a destination
-router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.put("/users/:userId/trips/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
@@ -89,8 +101,7 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
             return res.status(403).json({ message: "You are not authorized to update this destination" });
         }
 
@@ -111,7 +122,7 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Delete Route: Delete a destination
-router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.delete("/users/:userId/trips/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
@@ -119,8 +130,7 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
             return res.status(403).json({ message: "You are not authorized to delete this destination" });
         }
 
@@ -130,8 +140,10 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
             return res.status(404).json({ message: "Destination not found" });
         }
 
-        // Remove the destination reference from the trip
-        trip.destination = null;
+        const destinationIndex = trip.destination.findIndex(destId => destId.toString() === req.params.destinationId);
+        if (destinationIndex > -1) {
+            trip.destination.splice(destinationIndex, 1);
+        }
         await trip.save();
 
         res.status(200).json(deletedDestination);
@@ -140,4 +152,4 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
     }
 });
 
-module.exports = router; 
+module.exports = router;
