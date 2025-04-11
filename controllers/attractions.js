@@ -2,10 +2,51 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
+const Trip = require('../models/trip');
+
+// Helper function to validate trip access
+async function validateTripAccess(req, res) {
+    const trip = await Trip.findById(req.params.tripId);
+    if (!trip) {
+        return { error: true, status: 404, message: "Trip not found" };
+    }
+
+    // Check if user is authorized using ObjectId.equals()
+    if (!trip.travellers.some(travellerId => travellerId.equals(req.user._id))) {
+        return { error: true, status: 403, message: "Unauthorized to access this trip" };
+    }
+
+    return { error: false, trip };
+}
+
+// New Route: Form for creating a new attraction
+router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/new', verifyToken, async (req, res) => {
+    try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
+        const destination = await Destination.findById(req.params.destinationId);
+        if (!destination) {
+            return res.status(404).json({ message: "Destination not found" });
+        }
+        res.status(200).json({ message: "New Attraction Form" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Index Route: Get all attractions for a destination
 router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
@@ -19,6 +60,12 @@ router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 // Show Route: Get a specific attraction
 router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
@@ -36,6 +83,12 @@ router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 // Create Route: Create a new attraction
 router.post('/users/:userId/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
@@ -51,6 +104,12 @@ router.post('/users/:userId/trips/:tripId/destinations/:destinationId/attraction
 // Update Route: Update an attraction
 router.put('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
@@ -70,6 +129,12 @@ router.put('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 // Delete Route: Delete an attraction
 router.delete('/users/:userId/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
+        // Validate trip access
+        const tripValidation = await validateTripAccess(req, res);
+        if (tripValidation.error) {
+            return res.status(tripValidation.status).json({ message: tripValidation.message });
+        }
+
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
