@@ -58,7 +58,6 @@ router.get("/:tripId", verifyToken, async (req, res) => {
     }
 });
 
-// THIS ISN'T WORKING FOR SOME REASON
 // Update Route: Update a trip
 router.put("/:tripId", verifyToken, async (req, res) => {
     try {
@@ -99,7 +98,6 @@ router.put("/:tripId", verifyToken, async (req, res) => {
     }
 });
 
-// THIS ISN'T WORKING FOR SOME REASON
 // Delete Route: Delete a trip
 router.delete("/:tripId", verifyToken, async (req, res) => {
     try {
