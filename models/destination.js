@@ -7,8 +7,19 @@ const attractionSchema = new mongoose.Schema({
         required: true,
     },
     location: {
-        type: String,
+        // type: String,
+        lat: Number,
+        lng: Number,
         required: true,
+    },
+    address: {
+        type: String,
+    },
+    placeId: {
+        type: String,
+    },
+    photos: {
+        type: [String],  
     },
     description: {
         type: String,
@@ -25,13 +36,26 @@ const attractionSchema = new mongoose.Schema({
     isVisited: {
         type: Boolean,
         default: false,
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 });
 
 const destinationSchema = new mongoose.Schema({
-    location: {
+    name: {
         type: String,
         required: true,
+    },
+    location: {
+        // type: String,
+        lat: Number,
+        lng: Number,
+        required: true,
+    },
+    placeId: {
+        type: String,
     },
     startDate: {
         type: Date,
@@ -41,6 +65,10 @@ const destinationSchema = new mongoose.Schema({
     },
     accommodations: {
         type: String,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     // Properly embed attractionsSchema as a subdocument array
     attractions: [attractionSchema],
