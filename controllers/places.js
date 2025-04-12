@@ -13,6 +13,7 @@ const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
 
 // Search for cities/countries and make sure autocomplete is used
+// Test at this route: http://localhost:3000/api/places/autocomplete?input=paris-france
 router.get('/autocomplete', verifyToken, async (req, res) => {
     try {
         const { input } = req.query;
@@ -52,5 +53,37 @@ router.get('/:placeId', verifyToken, async (req, res) => {
     };
 });
 
+// None of this is working
+// // Search for attractions within a preset radius of the searched destination
+// router.get('/nearby', verifyToken, async (req, res) => {
+//     try {
+//         // 
+        
+//         const {
+//             lat,
+//             lng,
+//             // Default radius to search is 15km (~9 miles)
+//             radius = 15000,
+//         } = req.query;
+
+//         if (!lat || !lng) {
+//             return res.status(400).json({ message: 'Missing lat/lng query parameters' });
+//         }
+
+//         const params = {
+//             location: `${lat},${lng}`,
+//             radius,
+//             key: GOOGLE_API_KEY,
+//         };
+
+//         const response = await axios.get(`${PLACES_API_BASE}/nearbysearch/json`, {
+//             params
+//         });
+
+//         res.json(response.data);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching nearby attractions.' });
+//     }
+// });
 
 module.exports = router;
