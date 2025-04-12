@@ -10,7 +10,7 @@ const attractionSchema = new mongoose.Schema({
         // type: String,
         lat: Number,
         lng: Number,
-        required: true,
+        // required: true,
     },
     address: {
         type: String,
@@ -52,7 +52,7 @@ const destinationSchema = new mongoose.Schema({
         // type: String,
         lat: Number,
         lng: Number,
-        required: true,
+        // required: true,
     },
     placeId: {
         type: String,
