@@ -7,20 +7,52 @@ const googlePlaces = require('../services/googlePlaces');
 
 
 // Create a Destination:
-router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) => {
+// Updating this route to ensure data is explicitly selected from only specific req.body field which protects against data being added unnecessarily (whether malicious or accidental)
+router.post("/:tripId/destinations", verifyToken, async (req, res) => {
     try {
         // First find the trip to verify it exists
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
+        };
+
+        // Updated check if user is an authorized traveller so it supports complex traveller objects (ie more than just an ID). Converting IDs to strings means they can be compared accurately to ensure a traveller is authorized (this is because I was started to get errors about a user not being authorized, even though I knew they were...).
+        const userIsTraveller = trip.travellers.some(traveller => 
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
+
+        // Create the destination using Google places data
+        // Testing this now by entering name and lat/lng
+        const destinationData = {
+            name: req.body.name,
+            location: {
+                lat: req.body.location.lat,
+                lng: req.body.location.lng,
+            },
+            address: req.body.address,
+            placeId: req.body.placeId,
+            startDate: req.body.startDate || null,
+            endDate: req.body.endDate || null,
+            accommodations: req.body.accommodations || '',
+            // Start as an empty array so we can add to it later
+            attractions: [],
         }
 
-        // Create the destination
-        const destination = await Destination.create(req.body);
+        // Now pass through destinationData instead of req.body
+        const destination = await Destination.create(destinationData);
 
-        // Update the trip with the new destination
-        trip.destination = destination._id;
+        // If there is no destinations array yet, establish that so new destinations can be added to it. Adding this so that when a destination is deleted, we can push to an empty array instead of null.
+        if (!trip.destination) {
+            trip.destination = [];
+        };
+
+        // Update the trip with the new destination; updated again to add a new destination to the destinations array because each new destination created was overriding the previously created destination
+        trip.destination.push(destination._id);
         await trip.save();
 
         res.status(201).json(destination);
@@ -39,10 +71,14 @@ router.get("/:tripId/destinations", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.some(traveller => traveller.user.toString() === req.user._id.toString())) {
-            return res.status(403).json({ message: "You are not authorized to view destinations for this trip" });
-        }
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
 
         res.status(200).json(trip.destination);
     } catch (error) {
@@ -59,10 +95,14 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.some(traveller => traveller.user.toString() === req.user._id.toString())) {
-            return res.status(403).json({ message: "You are not authorized to view this destination" });
-        }
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
 
         const destination = await Destination.findById(req.params.destinationId);
 
@@ -79,15 +119,42 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 // Update Route: Update a destination
 router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
-        const destination = await Destination.findById(req.params.destinationId);
+        const trip = await Trip.findById(req.params.tripId);
 
-        if (!destination) {
-            return res.status(404).json({ message: "Destination not found" });
+        if (!trip) {
+            return res.status(404).json({ message: "Trip not found" });
         }
+
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
+
+        // Here we explicitly define which fields are actually able to be updated instead of leaving it all up to the user. 
+        const updateData = {
+            name: req.body.name,
+            location: req.body.location,
+            placeId: req.body.placeId,
+            startDate: req.body.startDate,
+            endDate: req.body.endDate,
+            accommodations: req.body.accommodations,
+        };
+
+        // If some fields aren't updated in this put request, the original data will be overridden with "undefined" (not what we want). So here we remove any undefinited fields so the original data remains unchanged.
+        // Object.key(updateData) => returns an array of all keys of updateData (name, location, etc.)
+        // For each key, if the key is undefined, delete that key from updateData (so that when updateData is used to update updatedDestination, there are no undefined keys passed through to the new object).
+        Object.keys(updateData).forEach(key => 
+            updateData[key] === undefined && delete updateData[key]
+        );
 
         const updatedDestination = await Destination.findByIdAndUpdate(
             req.params.destinationId,
-            req.body,
+            // Now pass through updateData instead of req.body
+            updateData,
             { new: true }
         );
 
@@ -106,6 +173,15 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, 
             return res.status(404).json({ message: "Trip not found" });
         }
 
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
+
         const deletedDestination = await Destination.findByIdAndDelete(req.params.destinationId);
 
         if (!deletedDestination) {
@@ -113,7 +189,10 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, 
         }
 
         // Remove the destination reference from the trip
-        trip.destination = null;
+        // trip.destination = null;
+        // Remove the destination from the trip by filtering through all the IDs and keep only the IDs that do not match the ID that the user is deleting.
+        trip.destination = trip.destination.filter(destinationId => destinationId.toString() !== req.params.destinationId);
+        
         await trip.save();
 
         res.status(200).json(deletedDestination);

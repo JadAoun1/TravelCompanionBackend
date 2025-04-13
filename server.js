@@ -16,6 +16,7 @@ const tripRouter = require('./controllers/trip.js');
 const userRouter = require('./controllers/users.js');
 const destinationRouter = require('./controllers/destination.js');
 const attractionsRouter = require('./controllers/attractions.js');
+const placesRouter = require('./controllers/places.js');
 const googleRouter = require('./controllers/google.js');
 const recommendationsRouter = require('./controllers/recommendations.js');
 
@@ -47,6 +48,7 @@ app.use('/trips', destinationRouter);
 // trying to avoid route conflicts to updating to:
 // app.use('/trips/:tripId/destinations', destinationRouter);
 app.use('/', attractionsRouter);
+app.use('/api/places', placesRouter);
 app.use('/google', googleRouter);
 app.use('/recommendations', recommendationsRouter);
 
