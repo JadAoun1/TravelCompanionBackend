@@ -45,6 +45,11 @@ router.post("/:tripId/destinations", verifyToken, async (req, res) => {
         // Now pass through destinationData instead of req.body
         const destination = await Destination.create(destinationData);
 
+        // If there is no destinations array yet, establish that so new destinations can be added to it. Adding this so that when a destination is deleted, we can push to an empty array instead of null.
+        if (!trip.destination) {
+            trip.destination = [];
+        };
+
         // Update the trip with the new destination; updated again to add a new destination to the destinations array because each new destination created was overriding the previously created destination
         trip.destination.push(destination._id);
         await trip.save();
@@ -162,7 +167,6 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
     }
 });
 
-// IN THE MIDDLE OF WORKING ON DELETE BUT CHANGING BRANCH ORGANIZATION
 // Delete Route: Delete a destination
 router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
     try {
@@ -190,8 +194,6 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
         // Remove the destination reference from the trip
         // trip.destination = null;
         // Remove the destination from the trip by filtering through all the IDs and keep only the IDs that do not match the ID that the user is deleting.
-        const destinationId = await Destination.findById(req.params.destinationId);
-
         trip.destination = trip.destination.filter(destinationId => destinationId.toString() !== req.params.destinationId);
         
         await trip.save();
