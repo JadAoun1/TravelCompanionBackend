@@ -78,7 +78,7 @@ router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractio
         if (!attraction) {
             return res.status(404).json({ message: "Attraction not found" });
         }
-        attraction.remove();
+        destination.attractions.pull(req.params.attractionId);
         await destination.save();
         res.status(200).json({ message: "Attraction deleted successfully" });
     } catch (error) {
