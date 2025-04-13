@@ -1,4 +1,3 @@
-// server.js
 
 // ------------------------------------------------------------------ npm ------------------------------------------------------------------
 
@@ -17,6 +16,8 @@ const tripRouter = require('./controllers/trip.js');
 const userRouter = require('./controllers/users.js');
 const destinationRouter = require('./controllers/destination.js');
 const attractionsRouter = require('./controllers/attractions.js');
+const googleRouter = require('./controllers/google.js');
+const recommendationsRouter = require('./controllers/recommendations.js');
 
 // ----------------------------------------------------------- Connect to MongoDB ------------------------------------------------------------
 
@@ -34,6 +35,11 @@ app.use(logger('dev'));
 
 // ----------------------------------------------------------------- Routes ------------------------------------------------------------------
 
+// Test route
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is running correctly!' });
+});
+
 app.use('/auth', authRouter);
 app.use('/trips', tripRouter);
 app.use('/users', userRouter);
@@ -41,6 +47,8 @@ app.use('/trips', destinationRouter);
 // trying to avoid route conflicts to updating to:
 // app.use('/trips/:tripId/destinations', destinationRouter);
 app.use('/', attractionsRouter);
+app.use('/google', googleRouter);
+app.use('/recommendations', recommendationsRouter);
 
 // ----------------------------------------------------------------- Server ------------------------------------------------------------------
 

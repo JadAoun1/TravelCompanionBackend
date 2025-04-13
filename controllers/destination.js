@@ -3,6 +3,7 @@ const router = express.Router();
 const { verifyToken, canEditTrip } = require("../middleware/verify-token.js");
 const Destination = require("../models/destination");
 const Trip = require("../models/trip");
+const googlePlaces = require('../services/googlePlaces');
 
 
 // Create a Destination:
@@ -116,6 +117,49 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, 
         await trip.save();
 
         res.status(200).json(deletedDestination);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Add a route to get recommendations for a destination
+router.get('/:tripId/destinations/:destinationId/recommendations', verifyToken, async (req, res) => {
+    try {
+        const destination = await Destination.findById(req.params.destinationId);
+
+        if (!destination) {
+            return res.status(404).json({ message: "Destination not found" });
+        }
+
+        // Get the location coordinates by geocoding the destination location
+        const geocodeResult = await googlePlaces.geocodeAddress(destination.location);
+
+        if (geocodeResult.status !== 'OK' || geocodeResult.results.length === 0) {
+            return res.status(400).json({
+                message: "Could not geocode destination location",
+                status: geocodeResult.status
+            });
+        }
+
+        const location = geocodeResult.results[0].geometry.location;
+        const locationString = `${location.lat},${location.lng}`;
+
+        // Get attractions, restaurants, and hotels in parallel
+        const [attractions, restaurants, hotels] = await Promise.all([
+            googlePlaces.getNearbyPlaces(locationString, 'tourist_attraction'),
+            googlePlaces.getNearbyPlaces(locationString, 'restaurant'),
+            googlePlaces.getNearbyPlaces(locationString, 'lodging')
+        ]);
+
+        res.status(200).json({
+            destination: destination.location,
+            coordinates: location,
+            recommendations: {
+                attractions: attractions.results || [],
+                restaurants: restaurants.results || [],
+                hotels: hotels.results || []
+            }
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -1,9 +1,8 @@
-// controllers/users.js
 
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user.js');
-const verifyToken = require('../middleware/verify-token');
+const { verifyToken } = require('../middleware/verify-token');
 
 // route to get details of all users
 router.get('/', verifyToken, async (req, res) => {
