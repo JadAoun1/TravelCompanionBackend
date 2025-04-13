@@ -40,6 +40,7 @@ router.get('/users/:userId/trips/:tripId/destinations/:destinationId/attractions
 
 // Index Route: Get all attractions for a destination
 router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
         // Validate trip access
         const tripValidation = await validateTripAccess(req, res);
@@ -58,6 +59,7 @@ router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken
 });
 
 // Show Route: Get a specific attraction
+router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
 router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
         // Validate trip access
@@ -82,6 +84,7 @@ router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
 
 // Create Route: Create a new attraction
 router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
     try {
         // Validate trip access
         const tripValidation = await validateTripAccess(req, res);
@@ -102,6 +105,7 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
 });
 
 // Update Route: Update an attraction
+router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
 router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     try {
         // Validate trip access
@@ -127,6 +131,7 @@ router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
 });
 
 // Delete Route: Delete an attraction
+router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
 router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
     
     try {

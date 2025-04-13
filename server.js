@@ -37,7 +37,9 @@ app.use(logger('dev'));
 app.use('/auth', authRouter);
 app.use('/users/:userId/trips', tripRouter);
 app.use('/users', userRouter);
-app.use('/', destinationRouter);
+app.use('/trips', destinationRouter);
+// trying to avoid route conflicts to updating to:
+// app.use('/trips/:tripId/destinations', destinationRouter);
 app.use('/', attractionsRouter);
 
 // ----------------------------------------------------------------- Server ------------------------------------------------------------------
