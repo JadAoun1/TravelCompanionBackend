@@ -6,6 +6,7 @@ const Trip = require("../models/trip");
 
 
 // Create a Destination:
+// Updating this route to ensure data is explicitly selected from only specific req.body field which protects against data being added unnecessarily (whether malicious or accidental)
 router.post("/:tripId/destinations", verifyToken, async (req, res) => {
     try {
         // First find the trip to verify ownership
@@ -13,15 +14,36 @@ router.post("/:tripId/destinations", verifyToken, async (req, res) => {
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
+        };
+
+        // Updated check if user is an authorized traveller so it supports complex traveller objects (ie more than just an ID). Converting IDs to strings means they can be compared accurately to ensure a traveller is authorized (this is because I was started to get errors about a user not being authorized, even though I knew they were...).
+        const userIsTraveller = trip.travellers.some(traveller => 
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
+
+        // Create the destination using Google places data
+        // Testing this now by entering name and lat/lng
+        const destinationData = {
+            name: req.body.name,
+            location: {
+                lat: req.body.location.lat,
+                lng: req.body.location.lng,
+            },
+            address: req.body.address,
+            placeId: req.body.placeId,
+            startDate: req.body.startDate || null,
+            endDate: req.body.endDate || null,
+            accommodations: req.body.accommodations || '',
+            // Start as an empty array so we can add to it later
+            attractions: [],
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" });
-        }
-
-        // Create the destination
-        const destination = await Destination.create(req.body);
+        // Now pass through destinationData instead of req.body
+        const destination = await Destination.create(destinationData);
 
         // Update the trip with the new destination
         trip.destination = destination._id;
@@ -140,7 +162,7 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
     }
 });
 
-module.exports = router; 
+module.exports = router;
 
 // Below is a code graveyard for all my reverted changed. There were route conflicts that I tried to fix but still wasn't having luck. I then commented it all out, found a previous version of Jad's working destination routes, and added it above. Tested and working! Leaving the code below because I'm nervous about losing it.
 
