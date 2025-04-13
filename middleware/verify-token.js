@@ -2,6 +2,7 @@
 
 // We'll need to import jwt to use the verify method
 const jwt = require('jsonwebtoken');
+const Trip = require('../models/trip');
 
 function verifyToken(req, res, next) {
     try {
@@ -20,32 +21,32 @@ function verifyToken(req, res, next) {
 }
 
 // Add middleware to check if a user can edit a particular trip
-// const canEditTrip = async (req, res, next) => {
-//     try {
-//         const tripId = req.params.tripId;
-//         const userId = req.params.userId;
+const canEditTrip = async (req, res, next) => {
+    try {
+        const tripId = req.params.tripId;
+        const userId = req.user._id; // Get user ID from the authenticated user
 
-//         const trip = await Trip.findById(tripId);
+        const trip = await Trip.findById(tripId);
 
-//         if (!trip) {
-//             return res.status(404).json({ message: 'Trip not found.' });
-//         };
+        if (!trip) {
+            return res.status(404).json({ message: 'Trip not found.' });
+        }
 
-//         const userInTrip = trip.travellers.find((user) => {
-//             // Check if each user explicitly equals the userId and has either the role of an owner or an editor. 
-//             // Access the user property of each element of the travellers array within the trip schema.
-//             return user.travellers.toString() === userId.toString() && ['Owner', 'Editor'].includes(user.role);
-//         });
+        // Find if the user is in the travellers array and has Editor or Owner role
+        const userInTrip = trip.travellers.find((traveller) => {
+            return traveller.user.toString() === userId.toString() &&
+                ['Owner', 'Editor'].includes(traveller.role);
+        });
 
-//         if (!userInTrip) {
-//             return res.status(403).json({ message: 'You do not have correct permissions to edit this trip.' });
-//         };
+        if (!userInTrip) {
+            return res.status(403).json({ message: 'You do not have permission to edit this trip.' });
+        }
 
-//         next();
-//     } catch (error) {
-//         res.status(401).json({ error: error.message });
-//     };
-// };
+        next();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
-// We'll need to export this function to use it in our controller files
-module.exports = verifyToken;
+// We'll need to export both middleware functions
+module.exports = { verifyToken, canEditTrip };

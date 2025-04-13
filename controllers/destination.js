@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../middleware/verify-token.js");
+const { verifyToken, canEditTrip } = require("../middleware/verify-token.js");
 const Destination = require("../models/destination");
 const Trip = require("../models/trip");
 
 
 // Create a Destination:
+router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) => {
 // Updating this route to ensure data is explicitly selected from only specific req.body field which protects against data being added unnecessarily (whether malicious or accidental)
-router.post("/:tripId/destinations", verifyToken, async (req, res) => {
     try {
-        // First find the trip to verify ownership
+        // First find the trip to verify it exists
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
@@ -116,12 +116,12 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Update Route: Update a destination
-router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
-        const trip = await Trip.findById(req.params.tripId);
+        const destination = await Destination.findById(req.params.destinationId);
 
-        if (!trip) {
-            return res.status(404).json({ message: "Trip not found" });
+        if (!destination) {
+            return res.status(404).json({ message: "Destination not found" });
         }
 
         // Check if user is one of the travellers (with updates mirroring the create route)
@@ -157,10 +157,6 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             { new: true }
         );
 
-        if (!updatedDestination) {
-            return res.status(404).json({ message: "Destination not found" });
-        }
-
         res.status(200).json(updatedDestination);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -168,7 +164,7 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Delete Route: Delete a destination
-router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
