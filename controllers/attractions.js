@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const verifyToken = require('../middleware/verify-token.js');
+const { verifyToken, canEditTrip } = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
 
 // Index Route: Get all attractions for a destination
@@ -34,7 +34,7 @@ router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
 });
 
 // Create Route: Create a new attraction
-router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, canEditTrip, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -49,7 +49,7 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
 });
 
 // Update Route: Update an attraction
-router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, canEditTrip, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -68,7 +68,7 @@ router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
 });
 
 // Delete Route: Delete an attraction
-router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, canEditTrip, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {

@@ -1,23 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../middleware/verify-token.js");
+const { verifyToken, canEditTrip } = require("../middleware/verify-token.js");
 const Destination = require("../models/destination");
 const Trip = require("../models/trip");
 
 
 // Create a Destination:
-router.post("/:tripId/destinations", verifyToken, async (req, res) => {
+router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) => {
     try {
-        // First find the trip to verify ownership
+        // First find the trip to verify it exists
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
-        }
-
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" });
         }
 
         // Create the destination
@@ -44,7 +39,7 @@ router.get("/:tripId/destinations", verifyToken, async (req, res) => {
         }
 
         // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(traveller => traveller.user.toString() === req.user._id.toString())) {
             return res.status(403).json({ message: "You are not authorized to view destinations for this trip" });
         }
 
@@ -64,7 +59,7 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
         }
 
         // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
+        if (!trip.travellers.some(traveller => traveller.user.toString() === req.user._id.toString())) {
             return res.status(403).json({ message: "You are not authorized to view this destination" });
         }
 
@@ -81,17 +76,12 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Update Route: Update a destination
-router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
-        const trip = await Trip.findById(req.params.tripId);
+        const destination = await Destination.findById(req.params.destinationId);
 
-        if (!trip) {
-            return res.status(404).json({ message: "Trip not found" });
-        }
-
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to update this destination" });
+        if (!destination) {
+            return res.status(404).json({ message: "Destination not found" });
         }
 
         const updatedDestination = await Destination.findByIdAndUpdate(
@@ -100,10 +90,6 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             { new: true }
         );
 
-        if (!updatedDestination) {
-            return res.status(404).json({ message: "Destination not found" });
-        }
-
         res.status(200).json(updatedDestination);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -111,17 +97,12 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 });
 
 // Delete Route: Delete a destination
-router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
-        }
-
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to delete this destination" });
         }
 
         const deletedDestination = await Destination.findByIdAndDelete(req.params.destinationId);
@@ -140,7 +121,7 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
     }
 });
 
-module.exports = router; 
+module.exports = router;
 
 // Below is a code graveyard for all my reverted changed. There were route conflicts that I tried to fix but still wasn't having luck. I then commented it all out, found a previous version of Jad's working destination routes, and added it above. Tested and working! Leaving the code below because I'm nervous about losing it.
 
