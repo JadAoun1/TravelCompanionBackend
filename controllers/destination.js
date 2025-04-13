@@ -162,6 +162,7 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
     }
 });
 
+// IN THE MIDDLE OF WORKING ON DELETE BUT CHANGING BRANCH ORGANIZATION
 // Delete Route: Delete a destination
 router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
     try {
@@ -171,10 +172,14 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to delete this destination" });
-        }
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
 
         const deletedDestination = await Destination.findByIdAndDelete(req.params.destinationId);
 
@@ -183,7 +188,12 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, async (req, r
         }
 
         // Remove the destination reference from the trip
-        trip.destination = null;
+        // trip.destination = null;
+        // Remove the destination from the trip by filtering through all the IDs and keep only the IDs that do not match the ID that the user is deleting.
+        const destinationId = await Destination.findById(req.params.destinationId);
+
+        trip.destination = trip.destination.filter(destinationId => destinationId.toString() !== req.params.destinationId);
+        
         await trip.save();
 
         res.status(200).json(deletedDestination);
