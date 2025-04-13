@@ -119,14 +119,36 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to update this destination" });
-        }
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
+
+        // Here we explicitly define which fields are actually able to be updated instead of leaving it all up to the user. 
+        const updateData = {
+            name: req.body.name,
+            location: req.body.location,
+            placeId: req.body.placeId,
+            startDate: req.body.startDate,
+            endDate: req.body.endDate,
+            accommodations: req.body.accommodations,
+        };
+
+        // If some fields aren't updated in this put request, the original data will be overridden with "undefined" (not what we want). So here we remove any undefinited fields so the original data remains unchanged.
+        // Object.key(updateData) => returns an array of all keys of updateData (name, location, etc.)
+        // For each key, if the key is undefined, delete that key from updateData (so that when updateData is used to update updatedDestination, there are no undefined keys passed through to the new object).
+        Object.keys(updateData).forEach(key => 
+            updateData[key] === undefined && delete updateData[key]
+        );
 
         const updatedDestination = await Destination.findByIdAndUpdate(
             req.params.destinationId,
-            req.body,
+            // Now pass through updateData instead of req.body
+            updateData,
             { new: true }
         );
 
