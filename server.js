@@ -17,6 +17,7 @@ const tripRouter = require('./controllers/trip.js');
 const userRouter = require('./controllers/users.js');
 const destinationRouter = require('./controllers/destination.js');
 const attractionsRouter = require('./controllers/attractions.js');
+const placesRouter = require('./controllers/places.js');
 
 // ----------------------------------------------------------- Connect to MongoDB ------------------------------------------------------------
 
@@ -41,6 +42,7 @@ app.use('/trips', destinationRouter);
 // trying to avoid route conflicts to updating to:
 // app.use('/trips/:tripId/destinations', destinationRouter);
 app.use('/', attractionsRouter);
+app.use('/api/places', placesRouter);
 
 // ----------------------------------------------------------------- Server ------------------------------------------------------------------
 

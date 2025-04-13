@@ -13,7 +13,8 @@ const tripSchema = new mongoose.Schema(
             type: String,
         },
         // Reference destinationSchema in destination.js
-        destination: { type: mongoose.Schema.Types.ObjectId, ref: "Destination" },
+        // Updated to make sure multiple destinations can be created since without the array [], a newly created destination was overriding any previously added destination 
+        destination: [{ type: mongoose.Schema.Types.ObjectId, ref: "Destination" }],
         // Reference userSchema in user.js
         // Converting travellers to an array to allow multiple users to be added to a trip
         // travellers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
