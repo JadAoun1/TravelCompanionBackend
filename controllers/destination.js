@@ -45,8 +45,8 @@ router.post("/:tripId/destinations", verifyToken, async (req, res) => {
         // Now pass through destinationData instead of req.body
         const destination = await Destination.create(destinationData);
 
-        // Update the trip with the new destination
-        trip.destination = destination._id;
+        // Update the trip with the new destination; updated again to add a new destination to the destinations array because each new destination created was overriding the previously created destination
+        trip.destination.push(destination._id);
         await trip.save();
 
         res.status(201).json(destination);
@@ -89,10 +89,14 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        // Check if user is one of the travellers
-        if (!trip.travellers.includes(req.user._id)) {
-            return res.status(403).json({ message: "You are not authorized to view this destination" });
-        }
+        // Check if user is one of the travellers (with updates mirroring the create route)
+        const userIsTraveller = trip.travellers.some(traveller =>
+            traveller.user && traveller.user.toString() === req.user._id.toString()
+        );
+
+        if (!userIsTraveller) {
+            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+        };
 
         const destination = await Destination.findById(req.params.destinationId);
 
