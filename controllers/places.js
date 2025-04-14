@@ -33,7 +33,45 @@ router.get('/autocomplete', verifyToken, async (req, res) => {
     };
 });
 
+// Had to move this route because of a route conflict with /:placeId (below)
+// Search for attractions within a preset radius of the searched destination
+// Test this: http://localhost:3000/api/places/nearby?lat=48.8584&lng=2.2945&radius=5000&type=tourist_attraction
+router.get('/nearby', verifyToken, async (req, res) => {
+    try {
+        const {
+            lat,
+            lng,
+            // Default radius to search is 15km (~9 miles)
+            radius = 15000,
+            type,
+            keyword,
+        } = req.query;
+
+        if (!lat || !lng) {
+            return res.status(400).json({ message: 'Missing lat/lng query parameters' });
+        }
+
+        const params = {
+            location: `${lat},${lng}`,
+            radius,
+            key: GOOGLE_API_KEY,
+        };
+
+        if (type) params.type = type;
+        if (keyword) params.keyword = keyword;
+
+        const response = await axios.get(`${PLACES_API_BASE}/nearbysearch/json`, {
+            params
+        });
+
+        res.json(response.data.results);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching nearby attractions.' });
+    }
+});
+
 // Get more details from the API about a specific place based on the place_id
+// Once above example is tested, use the placeId and test this route
 router.get('/:placeId', verifyToken, async (req, res) => {
     try {
         const { placeId } = req.params;
@@ -53,37 +91,6 @@ router.get('/:placeId', verifyToken, async (req, res) => {
     };
 });
 
-// None of this is working
-// // Search for attractions within a preset radius of the searched destination
-// router.get('/nearby', verifyToken, async (req, res) => {
-//     try {
-//         // 
-        
-//         const {
-//             lat,
-//             lng,
-//             // Default radius to search is 15km (~9 miles)
-//             radius = 15000,
-//         } = req.query;
 
-//         if (!lat || !lng) {
-//             return res.status(400).json({ message: 'Missing lat/lng query parameters' });
-//         }
-
-//         const params = {
-//             location: `${lat},${lng}`,
-//             radius,
-//             key: GOOGLE_API_KEY,
-//         };
-
-//         const response = await axios.get(`${PLACES_API_BASE}/nearbysearch/json`, {
-//             params
-//         });
-
-//         res.json(response.data);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching nearby attractions.' });
-//     }
-// });
 
 module.exports = router;
