@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 // Requiring axios as a way to make an HTTP request to an external API (versus interacting with my own database in MongoDB via Mongoose)
 const axios = require('axios');
-const verifyToken = require('../middleware/verify-token.js');
+const { verifyToken } = require('../middleware/verify-token.js');
 
 // Environment variables for Google API key
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
