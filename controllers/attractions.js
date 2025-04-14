@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken, canEditTrip } = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
+const axios = require('axios');
 
 // Index Route: Get all attractions for a destination
 router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
@@ -40,8 +41,26 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
         }
-        destination.attractions.push(req.body);
+
+        // Modeled after destination controller
+        const attractionData = {
+            name: req.body.name,
+            location: {
+                lat: req.body.location.lat,
+                lng: req.body.location.lng,
+            },
+            address: req.body.address,
+            placeId: req.body.placeId,
+            visitDate: req.body.visitDate || null,
+            cost: req.body.cost,
+            notes: req.body.notes,
+            isVisited: req.body.notes || false,
+        };
+
+        destination.attractions.push(attractionData);
+
         await destination.save();
+
         res.status(201).json(destination.attractions[destination.attractions.length - 1]);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -54,13 +73,29 @@ router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
-        }
+        };
         const attraction = destination.attractions.id(req.params.attractionId);
         if (!attraction) {
             return res.status(404).json({ message: "Attraction not found" });
-        }
+        };
+
+        // This method updates data in an embedded subdocument (compare to destinations update route that uses a different method better for updating on a "top level document").
+        // This method modifies the updated fields directly on the object.
+        // A benefit to this method is that it automatically prevents overwriting fields that weren't updated in the request (also compare to the way we did this in the destination route).
+        if (req.body.name) attraction.name = req.body.name;
+        if (req.body.location) attraction.location = req.body.location;
+        if (req.body.address) attraction.address = req.body.address;
+        if (req.body.description) attraction.description = req.body.description;
+        if (req.body.visitDate) attraction.visitDate = req.body.visitDate;
+        if (req.body.cost !== undefined) attraction.cost = req.body.cost;
+        if (req.body.notes) attraction.notes = req.body.notes;
+        if (req.body.isVisited !== undefined) attraction.isVisited = req.body.isVisited;
+        if (req.body.photos) attraction.photos = req.body.photos;
+
         attraction.set(req.body);
+
         await destination.save();
+
         res.status(200).json(attraction);
     } catch (error) {
         res.status(500).json({ error: error.message });
