@@ -70,8 +70,31 @@ router.get('/nearby', verifyToken, async (req, res) => {
     }
 });
 
+// Text search for attractions
+// Test this out by adding params into Postman (req per docs: query, radius)
+// Example: http://localhost:3000/api/places/textsearch?query=museum&radius=100 meters
+router.get('/textsearch', verifyToken, async (req, res) => {
+    try {
+        const { query, lat, lng, radius = 15000 } = req.query;
+
+        const response = await axios.get(`${PLACES_API_BASE}/textsearch/json`, {
+            params: {
+                query,
+                location: `${lat},${lng}`,
+                radius,
+                key: GOOGLE_API_KEY
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error search for places.' });
+    };
+});
+
 // Get more details from the API about a specific place based on the place_id
-// Once above example is tested, use the placeId and test this route
+// Once nearby route example is tested, use the placeId and test this route
 router.get('/:placeId', verifyToken, async (req, res) => {
     try {
         const { placeId } = req.params;
