@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken, canEditTrip } = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
+const axios = require('axios');
 
 // Index Route: Get all attractions for a destination
 router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
@@ -40,8 +41,26 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
         if (!destination) {
             return res.status(404).json({ message: "Destination not found" });
         }
-        destination.attractions.push(req.body);
+
+        // Modeled after destination controller
+        const attractionData = {
+            name: req.body.name,
+            location: {
+                lat: req.body.location.lat,
+                lng: req.body.location.lng,
+            },
+            address: req.body.address,
+            placeId: req.body.placeId,
+            visitDate: req.body.visitDate || null,
+            cost: req.body.cost,
+            notes: req.body.notes,
+            isVisited: req.body.notes || false,
+        };
+
+        destination.attractions.push(attractionData);
+        
         await destination.save();
+
         res.status(201).json(destination.attractions[destination.attractions.length - 1]);
     } catch (error) {
         res.status(500).json({ error: error.message });
