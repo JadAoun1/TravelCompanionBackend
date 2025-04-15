@@ -118,6 +118,7 @@ router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res)
 // Update Route: Update a destination
 router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
+        const trip = await Trip.findById(req.params.tripId);
         const destination = await Destination.findById(req.params.destinationId);
 
         if (!destination) {
