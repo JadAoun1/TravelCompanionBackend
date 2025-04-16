@@ -83,12 +83,9 @@ router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
         if (req.body.name) attraction.name = req.body.name;
         if (req.body.location) attraction.location = req.body.location;
         if (req.body.address) attraction.address = req.body.address;
-        if (req.body.description) attraction.description = req.body.description;
-        if (req.body.visitDate) attraction.visitDate = req.body.visitDate;
-        if (req.body.cost !== undefined) attraction.cost = req.body.cost;
-        if (req.body.notes) attraction.notes = req.body.notes;
-        if (req.body.isVisited !== undefined) attraction.isVisited = req.body.isVisited;
         if (req.body.photos) attraction.photos = req.body.photos;
+        if (req.body.notes) attraction.notes = req.body.notes;
+        if (req.body.visitDate) attraction.visitDate = req.body.visitDate;
 
         attraction.set(req.body);
 
