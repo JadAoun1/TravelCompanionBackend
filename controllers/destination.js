@@ -37,7 +37,6 @@ router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) 
             placeId: req.body.placeId,
             startDate: req.body.startDate || null,
             endDate: req.body.endDate || null,
-            accommodations: req.body.accommodations || '',
             // Start as an empty array so we can add to it later
             attractions: [],
         }
@@ -141,7 +140,6 @@ router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, asy
             placeId: req.body.placeId,
             startDate: req.body.startDate,
             endDate: req.body.endDate,
-            accommodations: req.body.accommodations,
         };
 
         // If some fields aren't updated in this put request, the original data will be overridden with "undefined" (not what we want). So here we remove any undefinited fields so the original data remains unchanged.

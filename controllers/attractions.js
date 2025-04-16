@@ -51,10 +51,8 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
             },
             address: req.body.address,
             placeId: req.body.placeId,
-            visitDate: req.body.visitDate || null,
-            cost: req.body.cost,
             notes: req.body.notes,
-            isVisited: req.body.notes || false,
+            visitDate: req.body.visitDate || null,
         };
 
         destination.attractions.push(attractionData);

@@ -21,21 +21,11 @@ const attractionSchema = new mongoose.Schema({
     photos: {
         type: [String],  
     },
-    description: {
+    notes: {
         type: String,
     },
     visitDate: {
         type: Date,
-    },
-    cost: {
-        type: Number,
-    },
-    notes: {
-        type: String,
-    },
-    isVisited: {
-        type: Boolean,
-        default: false,
     },
     createdAt: {
         type: Date,
@@ -62,9 +52,6 @@ const destinationSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-    },
-    accommodations: {
-        type: String,
     },
     createdAt: {
         type: Date,
