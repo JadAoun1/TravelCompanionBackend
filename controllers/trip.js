@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, canEditTrip } = require("../middleware/verify-token.js");
+const { verifyToken, canEditTrip, canViewTrip, canDeleteTrip } = require("../middleware/verify-token.js");
 const Trip = require("../models/trip");
 const Destination = require("../models/destination");
+const user = require("../models/user");
 
 // INDUCES
 
@@ -43,11 +44,11 @@ router.get("/", verifyToken, async (req, res) => {
 });
 
 // Show Route: Show a specific trip
-router.get("/:tripId", verifyToken, async (req, res) => {
+router.get("/:tripId", verifyToken, canViewTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId)
             .populate("destination")
-            .populate("travellers");
+            .populate("travellers.user", "username"); // Populate the user field with only the username
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
@@ -75,7 +76,7 @@ router.put("/:tripId", verifyToken, canEditTrip, async (req, res) => {
 });
 
 // Delete Route: Delete a trip
-router.delete("/:tripId", verifyToken, canEditTrip, async (req, res) => {
+router.delete("/:tripId", verifyToken, canDeleteTrip, async (req, res) => {
     try {
         const deletedTrip = await Trip.findByIdAndDelete(req.params.tripId);
         res.status(200).json(deletedTrip);
