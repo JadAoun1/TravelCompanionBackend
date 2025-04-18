@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, canEditTrip, canViewTrip, canDeleteTrip, } = require("../middleware/verify-token.js");
+const { verifyToken, canEditTrip, canViewTrip } = require("../middleware/verify-token.js");
 const Trip = require("../models/trip");
 const Destination = require("../models/destination");
 const User = require("../models/user");
@@ -44,12 +44,13 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// Show Route: Show a specific trip
+//Show Route: Show a specific trip
 router.get("/:tripId", verifyToken, canViewTrip, async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.tripId)
       .populate("destination")
-      .populate("travellers.user", "username"); // Populate the user field with only the username
+      .populate("travellers.user", "_id username") // Populate the user field with only the username, _id needs to be included to be able to see user id in the frontend and see user role. 
+      
 
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
@@ -77,8 +78,24 @@ router.put("/:tripId", verifyToken, canEditTrip, async (req, res) => {
 });
 
 // Delete Route: Delete a trip
-router.delete("/:tripId", verifyToken, canDeleteTrip, async (req, res) => {
+router.delete("/:tripId", verifyToken, async (req, res) => {
   try {
+    const userId = req.user._id;
+
+    const trip = await Trip.findById(req.params.tripId);
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found." });
+    }
+
+    // Check if user is owner
+   const isOwner = trip.travellers.some(traveller => {
+      return traveller.user.toString() === userId.toString() && traveller.role === "Owner"
+   })
+
+    if (!isOwner) {
+      return res.status(403).json({ message: "You do not have permission to delete this trip." });
+    }
+
     const deletedTrip = await Trip.findByIdAndDelete(req.params.tripId);
     res.status(200).json(deletedTrip);
   } catch (error) {

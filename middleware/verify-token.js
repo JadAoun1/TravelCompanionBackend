@@ -80,36 +80,36 @@ const canViewTrip = async (req, res, next) => {
   }
 };
 
-// Not sure if this will be needed 
+// Not Needed anymore since it is not being used across the app and only needs to be used in the trip controller to delete trip. 
 // Delete middleware for owner only
 // Same logic as before but changing userinTrip to only check for owner role
-const canDeleteTrip = async (req, res, next) => {
-    try {
-        const tripId = req.params.tripId;
-        const userId = req.user._id;
+// const canDeleteTrip = async (req, res, next) => {
+//     try {
+//         const tripId = req.params.tripId;
+//         const userId = req.user._id;
 
-        const trip = await Trip.findById(tripId);
-        if (!trip) {
-            return res.status(404).json({ message: "Trip not found." });
-        }
+//         const trip = await Trip.findById(tripId);
+//         if (!trip) {
+//             return res.status(404).json({ message: "Trip not found." });
+//         }
 
-        const userInTrip = trip.travellers.find((traveller) => {
-            return (
-                traveller.user.toString() === userId.toString() &&
-                traveller.role === "Owner"
-            );
-        });
+//         const userInTrip = trip.travellers.find((traveller) => {
+//             return (
+//                 traveller.user.toString() === userId.toString() &&
+//                 traveller.role === "Owner"
+//             );
+//         });
 
-        if (!userInTrip) {
-            return res
-                .status(403)
-                .json({ message: "You do not have permission to delete this trip." });
-        }
-        next();
-    } catch {
-        res.status(500).json({ error: error.message });
-    }
-}
+//         if (!userInTrip) {
+//             return res
+//                 .status(403)
+//                 .json({ message: "You do not have permission to delete this trip." });
+//         }
+//         next();
+//     } catch {
+//         res.status(500).json({ error: error.message });
+//     }
+// }
 
 // We'll need to export both middleware functions
-module.exports = { verifyToken, canEditTrip, canViewTrip, canDeleteTrip };
+module.exports = { verifyToken, canEditTrip, canViewTrip};
