@@ -29,7 +29,12 @@ mongoose.connection.on('connected', () => {
 
 // --------------------------------------------------------------- Middleware ----------------------------------------------------------------
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://triplabapp.netlify.app/',
+    // only needed if you're sending cookies or auth tokens
+    credentials: true
+}));;
+
 app.use(express.json());
 app.use(logger('dev'));
 
