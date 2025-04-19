@@ -3,11 +3,11 @@
 // ------------------------------------------------------------------ npm ------------------------------------------------------------------
 
 const dotenv = require('dotenv');
-dotenv.config(); // Load .env file for local dev
+dotenv.config();
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const cors = require('cors'); // Keep this import
+const cors = require('cors');
 const logger = require('morgan');
 
 // ------------------------------------------------------------- Import Routers -------------------------------------------------------------
@@ -21,17 +21,10 @@ const placesRouter = require('./controllers/places.js');
 
 // ----------------------------------------------------------- Connect to MongoDB ------------------------------------------------------------
 
-if (!process.env.MONGODB_URI) {
-    console.error("FATAL ERROR: MONGODB_URI is not defined.");
-    process.exit(1);
-}
 mongoose.connect(process.env.MONGODB_URI);
+
 mongoose.connection.on('connected', () => {
     console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
-});
-mongoose.connection.on('error', (err) => {
-    console.error(`MongoDB connection error: ${err}`);
-    process.exit(1);
 });
 
 // --------------------------------------------------------------- Middleware ----------------------------------------------------------------
@@ -67,8 +60,7 @@ app.use(logger('dev')); // Morgan logger
 app.use('/auth', authRouter);
 app.use('/trips', tripRouter);
 app.use('/users', userRouter);
-// Potential fix for route conflict:
-app.use('/trips/:tripId/destinations', destinationRouter);
+app.use('/trips', destinationRouter);
 app.use('/', attractionsRouter); // Consider namespacing? /attractions
 app.use('/api/places', placesRouter);
 app.get('/', (req, res) => { // Basic test route
