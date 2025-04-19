@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, canEditTrip } = require("../middleware/verify-token.js");
+const { verifyToken, canEditTrip, canViewTrip, } = require("../middleware/verify-token.js");
 const Destination = require("../models/destination");
 const Trip = require("../models/trip");
 
@@ -60,7 +60,7 @@ router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) 
 });
 
 // Index Route: Get all destinations for a trip
-router.get("/:tripId/destinations", verifyToken, async (req, res) => {
+router.get("/:tripId/destinations", verifyToken, canViewTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId)
             .populate("destination");
@@ -85,7 +85,7 @@ router.get("/:tripId/destinations", verifyToken, async (req, res) => {
 });
 
 // Show Route: Show a specific destination
-router.get("/:tripId/destinations/:destinationId", verifyToken, async (req, res) => {
+router.get("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken, canEditTrip } = require('../middleware/verify-token.js');
+const { verifyToken, canEditTrip, canViewTrip,  } = require('../middleware/verify-token.js');
 const Destination = require('../models/destination.js');
 const axios = require('axios');
 
 // Index Route: Get all attractions for a destination
-router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, async (req, res) => {
+router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken, canViewTrip, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
@@ -18,7 +18,7 @@ router.get('/trips/:tripId/destinations/:destinationId/attractions', verifyToken
 });
 
 // Show Route: Get a specific attraction
-router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, async (req, res) => {
+router.get('/trips/:tripId/destinations/:destinationId/attractions/:attractionId', verifyToken, canViewTrip, async (req, res) => {
     try {
         const destination = await Destination.findById(req.params.destinationId);
         if (!destination) {
