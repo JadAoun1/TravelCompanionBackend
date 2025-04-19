@@ -9,7 +9,7 @@ const axios = require('axios');
 const { verifyToken } = require('../middleware/verify-token.js');
 
 // Environment variables for Google API key
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
 
 // Search for cities/countries and make sure autocomplete is used
@@ -22,7 +22,7 @@ router.get('/autocomplete', verifyToken, async (req, res) => {
                 input,
                 // This was suggested, but I'm leaving it out for broader search results so it's not limited to 'cities.'
                 // types: '(cities)',
-                key: GOOGLE_API_KEY
+                key: GOOGLE_MAPS_API_KEY
             }
         });
 
@@ -54,7 +54,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
         const params = {
             location: `${lat},${lng}`,
             radius,
-            key: GOOGLE_API_KEY,
+            key: GOOGLE_MAPS_API_KEY,
         };
 
         if (type) params.type = type;
@@ -82,7 +82,7 @@ router.get('/textsearch', verifyToken, async (req, res) => {
                 query,
                 location: `${lat},${lng}`,
                 radius,
-                key: GOOGLE_API_KEY
+                key: GOOGLE_MAPS_API_KEY
             }
         });
 
@@ -103,7 +103,7 @@ router.get('/:placeId', verifyToken, async (req, res) => {
                 place_id: placeId,
                 // Fields to return: name (name), geometry (lng, lat), formatted_address (readable address)
                 fields: 'name,geometry,formatted_address',
-                key: GOOGLE_API_KEY,
+                key: GOOGLE_MAPS_API_KEY,
             }
         });
 
