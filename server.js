@@ -31,8 +31,8 @@ mongoose.connection.on('connected', () => {
 
 // --- Recommended Detailed CORS Configuration ---
 const allowedOrigins = [
-    'https://triplabapp.netlify.app', // Your Netlify frontend URL **REQUIRED**
-    // Add local dev URL if needed: 'http://localhost:3000',
+    'https://triplabapp.netlify.app',
+    'http://localhost:5173',
 ];
 const corsOptions = {
     origin: function (origin, callback) {
