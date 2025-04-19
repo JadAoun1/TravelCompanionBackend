@@ -129,7 +129,7 @@ router.post("/:tripId/travellers", verifyToken, canEditTrip, async (req, res) =>
 
       // Check to see if the user is already a traveller
       const existingTraveller = trip.travellers.find(
-        (traveller) => traveller.user.toString() === username
+        (traveller) => traveller.user.toString() === user._id.toString // Changing to userId because username is not a field in the traveller object, using userId prevents single traveller from being added multiple times. 
       );
       if (existingTraveller) {
         return res.status(400).json({ message: "User is already a traveller" });
