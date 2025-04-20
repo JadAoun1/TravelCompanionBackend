@@ -1,7 +1,7 @@
 # TripLab
 
-#### Caption
-<img src="" alt="TripLab Home Page"/>
+#### Seamless planning for unforgettable escapes.
+<img src="public/images/triplab.png" alt="TripLab Home Page"/>
 
 ## Description
 TripLab is a collaborative travel planning platform designed to make organizing your next adventure simple and seamless. Whether you're mapping out a weekend getaway or a bucket-list journey with friends, TripLab brings your plans together in one easy-to-use space.
