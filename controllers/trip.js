@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, canEditTrip, canViewTrip } = require("../middleware/verify-token.js");
+const { verifyToken } = require("../middleware/verify-token.js");
+const { canViewTrip, canEditTrip } = require('../middleware/user-permissions.js');
 const Trip = require("../models/trip");
 const Destination = require("../models/destination");
 const User = require("../models/user");
