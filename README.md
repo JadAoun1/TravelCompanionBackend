@@ -1,9 +1,12 @@
 # TripLab
 
 #### Caption
-<img src="" alt=""/>
+<img src="" alt="TripLab Home Page"/>
+
+## Description
+TripLab is a collaborative travel planning platform designed to make organizing your next adventure simple and seamless. Whether you're mapping out a weekend getaway or a bucket-list journey with friends, TripLab brings your plans together in one easy-to-use space.
 
 ## Quick Links
-* **GitHub repo: Front-end** can be found [here](add link).
-* **GitHub repo: Back-end** can be found [here](add link).
-* **Deployed project** link can be found [here](add link).
+* **GitHub repo: Front-end** can be found [here](https://github.com/JadAoun1/travel-companion-frontend).
+* **GitHub repo: Back-end** can be found [here](https://github.com/JadAoun1/travel-companion-backend).
+* **Deployed project** link can be found [here](https://triplabapp.netlify.app/).
