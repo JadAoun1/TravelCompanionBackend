@@ -78,6 +78,7 @@ router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractio
         }
         destination.attractions.pull(req.params.attractionId);
         await destination.save();
+        res.status(200).json({ message: "Attraction deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
