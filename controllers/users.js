@@ -5,10 +5,9 @@ const router = express.Router();
 const User = require('../models/user.js');
 const { verifyToken } = require('../middleware/verify-token');
 
-// route to get details of all users
+// Index Route: Show all users
 router.get('/', verifyToken, async (req, res) => {
     try {
-        // Get a list of all users, but only return their username and _id
         const users = await User.find({}, "username");
 
         res.json(users);
@@ -17,10 +16,9 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-// route to get details of a user
+// Show route: Show details of one user
 router.get('/:userId', verifyToken, async (req, res) => {
     try {
-        // Block the request if a user is looking for the details of another user
         if (req.user._id !== req.params.userId) {
             return res.status(403).json({ error: 'You are not authorized to view these details.' });
         }
@@ -37,7 +35,7 @@ router.get('/:userId', verifyToken, async (req, res) => {
     };
 });
 
-// route to update a user
+// Update route: Update a user
 router.put('/:userId', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
@@ -46,7 +44,6 @@ router.put('/:userId', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'User not found.' });
         };
 
-        // Check if user is authorized to update
         if (req.user._id !== req.params.userId) {
             return res.status(403).json({ error: 'You are not authorized to view these details.' });
         };
@@ -64,7 +61,7 @@ router.put('/:userId', verifyToken, async (req, res) => {
     }
 });
 
-// route to delete a user
+// Delete route: Delete a user
 router.delete('/:userId', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.userId);
