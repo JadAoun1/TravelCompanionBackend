@@ -7,10 +7,8 @@ const attractionSchema = new mongoose.Schema({
         required: true,
     },
     location: {
-        // type: String,
         lat: Number,
         lng: Number,
-        // required: true,
     },
     address: {
         type: String,
@@ -39,10 +37,8 @@ const destinationSchema = new mongoose.Schema({
         required: true,
     },
     location: {
-        // type: String,
         lat: Number,
         lng: Number,
-        // required: true,
     },
     placeId: {
         type: String,
@@ -57,7 +53,6 @@ const destinationSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    // Properly embed attractionsSchema as a subdocument array
     attractions: [attractionSchema],
 });
 
