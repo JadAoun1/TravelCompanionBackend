@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-// Ensures that the returned object does not include the user's password
 userSchema.set('toJSON', {
     transform: (document, returnedObject) => {
         delete returnedObject.password;

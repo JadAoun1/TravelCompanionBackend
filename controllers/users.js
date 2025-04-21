@@ -1,88 +1,87 @@
 // controllers/users.js
 
-const express = require('express');
-const router = express.Router();
-const User = require('../models/user.js');
-const { verifyToken } = require('../middleware/verify-token');
+// --------------------------------------------------------------GRAVEYARD--------------------------------------------------------------
 
-// route to get details of all users
-router.get('/', verifyToken, async (req, res) => {
-    try {
-        // Get a list of all users, but only return their username and _id
-        const users = await User.find({}, "username");
+// const express = require('express');
+// const router = express.Router();
+// const User = require('../models/user.js');
+// const { verifyToken } = require('../middleware/verify-token');
 
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-});
+// Index Route: Show all users
+// router.get('/', verifyToken, async (req, res) => {
+//     try {
+//         const users = await User.find({}, "username");
 
-// route to get details of a user
-router.get('/:userId', verifyToken, async (req, res) => {
-    try {
-        // Block the request if a user is looking for the details of another user
-        if (req.user._id !== req.params.userId) {
-            return res.status(403).json({ error: 'You are not authorized to view these details.' });
-        }
+//         res.json(users);
+//     } catch (err) {
+//         res.status(500).json({ err: err.message });
+//     }
+// });
 
-        const user = await User.findById(req.params.userId);
+// Show route: Show details of one user
+// router.get('/:userId', verifyToken, async (req, res) => {
+//     try {
+//         if (req.user._id !== req.params.userId) {
+//             return res.status(403).json({ error: 'You are not authorized to view these details.' });
+//         }
 
-        if (!user) {
-            return res.status(400).json({ error: 'User not found.' });
-        };
+//         const user = await User.findById(req.params.userId);
 
-        res.json({ user });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    };
-});
+//         if (!user) {
+//             return res.status(400).json({ error: 'User not found.' });
+//         };
 
-// route to update a user
-router.put('/:userId', verifyToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.params.userId);
+//         res.json({ user });
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     };
+// });
 
-        if (!user) {
-            return res.status(403).json({ message: 'User not found.' });
-        };
+// Update route: Update a user
+// router.put('/:userId', verifyToken, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.userId);
 
-        // Check if user is authorized to update
-        if (req.user._id !== req.params.userId) {
-            return res.status(403).json({ error: 'You are not authorized to view these details.' });
-        };
+//         if (!user) {
+//             return res.status(403).json({ message: 'User not found.' });
+//         };
 
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.userId,
-            req.body,
-            { new: true }
-        );
+//         if (req.user._id !== req.params.userId) {
+//             return res.status(403).json({ error: 'You are not authorized to view these details.' });
+//         };
 
-        res.status(200).json(updatedUser);
+//         const updatedUser = await User.findByIdAndUpdate(
+//             req.params.userId,
+//             req.body,
+//             { new: true }
+//         );
 
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+//         res.status(200).json(updatedUser);
 
-// route to delete a user
-router.delete('/:userId', verifyToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.params.userId);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// });
 
-        if (!user) {
-            return res.status(403).json({ message: 'User not found.' });
-        };
+// Delete route: Delete a user
+// router.delete('/:userId', verifyToken, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.userId);
 
-        if (req.user._id !== req.params.userId) {
-            return res.status(403).json({ error: 'You are not authorized to delete this user.' });
-        };
+//         if (!user) {
+//             return res.status(403).json({ message: 'User not found.' });
+//         };
 
-        const deletedUser = await User.findByIdAndDelete(req.params.userId);
+//         if (req.user._id !== req.params.userId) {
+//             return res.status(403).json({ error: 'You are not authorized to delete this user.' });
+//         };
 
-        res.status(200).json({ deletedUser });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    };
-});
+//         const deletedUser = await User.findByIdAndDelete(req.params.userId);
 
-module.exports = router;
+//         res.status(200).json({ deletedUser });
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     };
+// });
+
+// module.exports = router;
