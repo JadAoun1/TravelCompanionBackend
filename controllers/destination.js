@@ -86,22 +86,13 @@ router.get("/:tripId/destinations", verifyToken, canViewTrip, async (req, res) =
 });
 
 // Show Route: Show a specific destination
-router.get("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
+router.get("/:tripId/destinations/:destinationId", verifyToken, canViewTrip, async (req, res) => {
     try {
         const trip = await Trip.findById(req.params.tripId);
 
         if (!trip) {
             return res.status(404).json({ message: "Trip not found" });
         }
-
-        // Check if user is one of the travellers (with updates mirroring the create route)
-        const userIsTraveller = trip.travellers.some(traveller =>
-            traveller.user && traveller.user.toString() === req.user._id.toString()
-        );
-
-        if (!userIsTraveller) {
-            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
-        };
 
         const destination = await Destination.findById(req.params.destinationId);
 
