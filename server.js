@@ -14,7 +14,6 @@ const logger = require('morgan');
 
 const authRouter = require('./controllers/auth.js');
 const tripRouter = require('./controllers/trip.js');
-const userRouter = require('./controllers/users.js');
 const destinationRouter = require('./controllers/destination.js');
 const attractionsRouter = require('./controllers/attractions.js');
 const placesRouter = require('./controllers/places.js');
@@ -56,18 +55,15 @@ app.use(express.json()); // Parses incoming JSON requests (Essential for POST/PU
 app.use(logger('dev')); // Morgan logger
 
 // ----------------------------------------------------------------- Routes ------------------------------------------------------------------
-// Routes AFTER middleware
 
 app.use('/auth', authRouter);
 app.use('/trips', tripRouter);
-app.use('/users', userRouter);
 app.use('/trips', destinationRouter);
 app.use('/', attractionsRouter); // Consider namespacing? /attractions
 app.use('/api/places', placesRouter);
 app.get('/', (req, res) => { // Basic test route
   res.send('TripLab API Backend is running!');
 });
-
 
 // ----------------------------------------------------------------- Server ------------------------------------------------------------------
 

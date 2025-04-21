@@ -95,49 +95,6 @@ router.post("/:tripId/destinations", verifyToken, canEditTrip, async (req, res) 
     }
 });
 
-// Update Route: Update a destination
-router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
-    try {
-        const trip = await Trip.findById(req.params.tripId);
-        const destination = await Destination.findById(req.params.destinationId);
-
-        if (!destination) {
-            return res.status(404).json({ message: "Destination not found" });
-        }
-
-        const userIsTraveller = trip.travellers.some(traveller =>
-            traveller.user && traveller.user.toString() === req.user._id.toString()
-        );
-
-        if (!userIsTraveller) {
-            return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
-        };
-
-        const updateData = {
-            name: req.body.name,
-            location: req.body.location,
-            placeId: req.body.placeId,
-            startDate: req.body.startDate,
-            endDate: req.body.endDate,
-        };
-
-        // If some fields aren't updated in this put request, the original data will be overridden with "undefined" (not what we want). So here we remove any undefined fields so the original data remains unchanged.
-        Object.keys(updateData).forEach(key => 
-            updateData[key] === undefined && delete updateData[key]
-        );
-
-        const updatedDestination = await Destination.findByIdAndUpdate(
-            req.params.destinationId,
-            updateData,
-            { new: true }
-        );
-
-        res.status(200).json(updatedDestination);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Delete Route: Delete a destination
 router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
     try {
@@ -172,3 +129,50 @@ router.delete("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, 
 });
 
 module.exports = router;
+
+// --------------------------------------------------------------GRAVEYARD--------------------------------------------------------------
+
+// PHASE II: CURRENTLY NOT USABLE VIA BUTTON ON FRONTEND
+
+// Update Route: Update a destination
+// router.put("/:tripId/destinations/:destinationId", verifyToken, canEditTrip, async (req, res) => {
+//     try {
+//         const trip = await Trip.findById(req.params.tripId);
+//         const destination = await Destination.findById(req.params.destinationId);
+
+//         if (!destination) {
+//             return res.status(404).json({ message: "Destination not found" });
+//         }
+
+//         const userIsTraveller = trip.travellers.some(traveller =>
+//             traveller.user && traveller.user.toString() === req.user._id.toString()
+//         );
+
+//         if (!userIsTraveller) {
+//             return res.status(403).json({ message: "You are not authorized to add destinations to this trip" })
+//         };
+
+//         const updateData = {
+//             name: req.body.name,
+//             location: req.body.location,
+//             placeId: req.body.placeId,
+//             startDate: req.body.startDate,
+//             endDate: req.body.endDate,
+//         };
+
+//         // If some fields aren't updated in this put request, the original data will be overridden with "undefined" (not what we want). So here we remove any undefined fields so the original data remains unchanged.
+//         Object.keys(updateData).forEach(key =>
+//             updateData[key] === undefined && delete updateData[key]
+//         );
+
+//         const updatedDestination = await Destination.findByIdAndUpdate(
+//             req.params.destinationId,
+//             updateData,
+//             { new: true }
+//         );
+
+//         res.status(200).json(updatedDestination);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// });
