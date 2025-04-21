@@ -17,6 +17,7 @@ const tripRouter = require('./controllers/trip.js');
 const destinationRouter = require('./controllers/destination.js');
 const attractionsRouter = require('./controllers/attractions.js');
 const placesRouter = require('./controllers/places.js');
+const userRouter = require('./controllers/users.js')
 
 // ----------------------------------------------------------- Connect to MongoDB ------------------------------------------------------------
 
@@ -57,6 +58,7 @@ app.use(logger('dev')); // Morgan logger
 // ----------------------------------------------------------------- Routes ------------------------------------------------------------------
 
 app.use('/auth', authRouter);
+app.use('/users', userRouter); 
 app.use('/trips', tripRouter);
 app.use('/trips', destinationRouter);
 app.use('/', attractionsRouter); // Consider namespacing? /attractions
