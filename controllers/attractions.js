@@ -43,7 +43,6 @@ router.post('/trips/:tripId/destinations/:destinationId/attractions', verifyToke
             return res.status(404).json({ message: "Destination not found" });
         }
 
-        // Modeled after destination controller
         const attractionData = {
             name: req.body.name,
             location: {
@@ -78,9 +77,6 @@ router.put('/trips/:tripId/destinations/:destinationId/attractions/:attractionId
             return res.status(404).json({ message: "Attraction not found" });
         };
 
-        // This method updates data in an embedded subdocument (compare to destinations update route that uses a different method better for updating on a "top level document").
-        // This method modifies the updated fields directly on the object.
-        // A benefit to this method is that it automatically prevents overwriting fields that weren't updated in the request (also compare to the way we did this in the destination route).
         if (req.body.name) attraction.name = req.body.name;
         if (req.body.location) attraction.location = req.body.location;
         if (req.body.address) attraction.address = req.body.address;
@@ -111,7 +107,6 @@ router.delete('/trips/:tripId/destinations/:destinationId/attractions/:attractio
         }
         destination.attractions.pull(req.params.attractionId);
         await destination.save();
-        res.status(200).json({ message: "Attraction deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
